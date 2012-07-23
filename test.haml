@@ -16,12 +16,14 @@
       %aside#left
         %h2="Google Geo Information"
         #googlegeo
-          %p
-            GOOGLEGEO   
+          %iframe{:width=>"300", :height=>"200", :frameborder=>"0", :scrolling => "no", :marginheight => "0", :marginwidth => "0", :src=>"http://maps.google.com/maps?q=#{:lat},#{:lng}&ll=#{:lat},#{:lng}&z=17&output=embed"} 
         %h2="Google Weather"
         #googleweather
-          %p
-            GOOGLEWEATHER
+          %h2="Aktuelles Wetter"
+          #curr_cond
+            =:current_conditions.each {|c| "<p>"+c.join(" ")+"</p>"} 
+          %h2="Wettervorhersage"
+          #fore_cond=:forecast_conditions.each {|c| "<p>"+c.join(" ")+"</p>"} 
       #content
         %h2="Flickr Photos"
         #flickr_photos

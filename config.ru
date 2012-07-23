@@ -8,51 +8,28 @@ load 'lib/BuzzwordSearchApp.rb'
 
 class HelloWorld
 
+
+
 	def initialize()
-		#HTML 
-		@htmlbase=[]
 
+    #Klassen zur Abfrage der Webservices
     @appClass = BuzzwordSearchApp.new
-
-		#HTML Konstanten fuer Default ( keine Query )
-		@GoogleMapConst = '<iframe width="300" height="200" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.de/?ie=UTF8&amp;ll=51.151786,10.415039&amp;spn=11.062731,33.815918&amp;t=m&amp;z=6&amp;output=embed"></iframe>'
-		@GoogleGeoConst = '<p></p>'
-		@YahooConst= '<p></p>'
-		@FlickrConst = '<p></p>'
-
-		#inital keine Query, Variablen für spezifische Inhalte
-		@google_map_html, @google_geo_html, @yahoo_html, @flickr_html = @GoogleMapConst, @GoogleGeoConst, @YahooConst, @FlickrConst
-
-		#Klassen zur Abfrage von Webservice
 		
 	end
 
   def call(env)   
 
 
-    getParam = getQuery(env)
-    #binding.pry
-    lines = getHTMLBase()
-
-    #Look for lines to replace
-    
-    flickr_nr = lines.index(lines.grep(/\s+FLICKR/)[0])
-    geo_nr = lines.index(lines.grep(/\s+GOOGLEGEO/)[0])
-    weather_nr = lines.index(lines.grep(/\s+GOOGLEWEATHER/)[0])
-    yahoo_nr = lines.index(lines.grep(/\s+YAHOO/)[0])
-    
-    if getParam == String.new
-      lines[flickr_nr]=@FlickrConst
-      lines[geo_nr]=@GoogleGeoConst 
-      lines[weather_nr]=@GoogleMapConst
-      lines[yahoo_nr]=@YahooConst
-
+    getparam = get_query(env)
+          
+    if getparam == String.new
+      lines=get_html_base(0,0,[],[],[],[])
     	[200,{'Content-Type' => 'text/html'}, lines]	
     else
       #binding.pry
-      unless getParam.nil? || getParam == String.new
-        @appClass.query(getParam.force_encoding("ISO-8859-1").encode("UTF-8"))
-        lines[flickr_nr]=@appClass.get_img_tags[0..30].join
+      if !getparam.nil? || !getparam == String.new
+        @appClass.query(encode_utf8(getparam))
+        lines=get_html_base(@appClass.get_lat, @appClass.get_lng, @appClass.get_current_conditions, @appClass.get_forecast_conditions, @appClass.get_img_tags, @appClass.get_yahoo_questions)
       end
 
     	[200,{'Content-Type' => 'text/html'}, lines]
@@ -61,13 +38,13 @@ class HelloWorld
   end
 
 
-  def getQuery(env)
+  def get_query(env)
 
   	result =""
   	if (env["QUERY_STRING"])
   		getParams= CGI::parse(env["QUERY_STRING"])
 
-  		result = getParams["query"][0]
+  		result = getParams["query"].join
   	end
 
   	result 
@@ -76,23 +53,21 @@ class HelloWorld
 
 
 
-  def getHTMLBase
-  	@htmlbase=[]
+  def get_html_base(lat, lng, curr_c, fore_c, img_tags, yahoo_answers)
 
     template = File.read('test.haml')
     haml_engine = Haml::Engine.new(template)
-    output = haml_engine.render
+    output = haml_engine.render(:locals => {:lat => lat, :lng => lng, :current_conditions => curr_c, :forecast_conditions => fore_c, :flickr_tags => img_tags, :yahoo_items => yahoo_answers}
+)
     lines =  output.split(/\n/)
-
-  	# f = File.open("test.html", "r") 
-  	# f.each_line do |line|
-  	# 	@htmlbase << line
-  	# end
-  	# @htmlbase
     lines
   end
 
+  def encode_utf8(str)
+    str.force_encoding("ISO-8859-1").encode("UTF-8")
+  end
 
+  
 end
 
 run HelloWorld.new
