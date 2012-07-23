@@ -1,0 +1,35 @@
+!!! 5
+%html
+  %head
+    %title= "Buzzword Search App"
+    %meta{:content => "", :name => "description" }
+    %meta{:content => "Ramona", :name => "author" }
+    %meta{:content => "3 days", :name => "revisit-after" }
+    %link{:href => "/css/screen.css", :media => "screen", :rel => "stylesheet" }
+  %body
+    %header
+      %h1= "Buzzword Search App"
+      %form{:method => "get"}
+        %input{:type=>"text", :name=>"query", :placeholder => "Ihre Suchangabe", :required => 'true'}
+        %input{:type=>"submit", :value=>"Suchen"}
+    #content-wrap
+      %aside#left
+        %h2="Google Geo Information"
+        #googlegeo
+          %p
+            GOOGLEGEO   
+        %h2="Google Weather"
+        #googleweather
+          %p
+            GOOGLEWEATHER
+      #content
+        %h2="Flickr Photos"
+        #flickr_photos
+          %p
+            FLICKR
+        %h2="Yahoo Answer Service"
+        #yahoo_answer
+          %p
+            YAHOO
+    %footer
+      %p

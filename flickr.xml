@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<rsp stat="ok">
+<photos page="1" pages="169811" perpage="20" total="3396206">
+	<photo id="7629907838" owner="35456406@N00" secret="c9d77bfd26" server="8289" farm="9" title="variation" ispublic="1" isfriend="0" isfamily="0" />
+	<photo id="7629898204" owner="76328922@N08" secret="0e72d97ee3" server="8146" farm="9" title="Washing day - Amsterdam" ispublic="1" isfriend="0" isfamily="0" />
+	<photo id="7629878152" owner="35456406@N00" secret="8c19a3db9e" server="7118" farm="8" title="fe970466-40c7-4cd4-b009-d12e219759f8" ispublic="1" isfriend="0" isfamily="0" />
+	<photo id="7629791556" owner="37368923@N08" secret="ec5d880e5d" server="7266" farm="8" title="Sunset over Amsterdam" ispublic="1" isfriend="0" isfamily="0" />
+	<photo id="7629871178" owner="37368923@N08" secret="8f2b29b284" server="8011" farm="9" title="Amsterdam cafe" ispublic="1" isfriend="0" isfamily="0" />
+	<photo id="7629840556" owner="37368923@N08" secret="80c68b6307" server="8144" farm="9" title="Canals of Amsterdam" ispublic="1" isfriend="0" isfamily="0" />
+	<photo id="7629784132" owner="54744985@N03" secret="c6bd0f04ac" server="7137" farm="8" title="Amsterdam (96)" ispublic="1" isfriend="0" isfamily="0" />
+	<photo id="7629765822" owner="54744985@N03" secret="c33d500c1c" server="8026" farm="9" title="Amsterdam (25)" ispublic="1" isfriend="0" isfamily="0" />
+	<photo id="7629771752" owner="54744985@N03" secret="4da06c93f1" server="7114" farm="8" title="Amsterdam (40)" ispublic="1" isfriend="0" isfamily="0" />
+	<photo id="7629768540" owner="54744985@N03" secret="f2a4774198" server="7127" farm="8" title="Amsterdam (29)" ispublic="1" isfriend="0" isfamily="0" />
+	<photo id="7629777302" owner="54744985@N03" secret="4037b1ecab" server="8009" farm="9" title="Amsterdam (60)" ispublic="1" isfriend="0" isfamily="0" />
+	<photo id="7629774538" owner="54744985@N03" secret="02b2aba376" server="8146" farm="9" title="Amsterdam (44)" ispublic="1" isfriend="0" isfamily="0" />
+	<photo id="7629773268" owner="54744985@N03" secret="d4ce11abcb" server="8160" farm="9" title="Amsterdam (43)" ispublic="1" isfriend="0" isfamily="0" />
+	<photo id="7629767316" owner="54744985@N03" secret="e3f497e839" server="8148" farm="9" title="Amsterdam (27)" ispublic="1" isfriend="0" isfamily="0" />
+	<photo id="7629779890" owner="54744985@N03" secret="de170bca11" server="8159" farm="9" title="Amsterdam (63)" ispublic="1" isfriend="0" isfamily="0" />
+	<photo id="7629775956" owner="54744985@N03" secret="173de72365" server="8155" farm="9" title="Amsterdam (52)" ispublic="1" isfriend="0" isfamily="0" />
+	<photo id="7629785746" owner="54744985@N03" secret="68594fb80b" server="7133" farm="8" title="Amsterdam (98)" ispublic="1" isfriend="0" isfamily="0" />
+	<photo id="7629781910" owner="54744985@N03" secret="9b1a04134a" server="8168" farm="9" title="Amsterdam (86)" ispublic="1" isfriend="0" isfamily="0" />
+	<photo id="7629782902" owner="54744985@N03" secret="f9f344ef3d" server="8149" farm="9" title="Amsterdam (94)" ispublic="1" isfriend="0" isfamily="0" />
+	<photo id="7629778736" owner="54744985@N03" secret="10f01845e3" server="8142" farm="9" title="Amsterdam (61)" ispublic="1" isfriend="0" isfamily="0" />
+</photos>
+</rsp>
