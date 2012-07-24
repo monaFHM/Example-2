@@ -2,6 +2,7 @@
 require 'json'
 require 'net/http'
 require 'uri'
+#require 'open-uri'
 require 'nokogiri'
 require 'pry'
 
@@ -10,13 +11,16 @@ module CommonlyUsed
 
 	def each_json_request(json_obj, request_params)
 	
-		unless request_params.nil? || json_obj.nil?
+    #unless is generally used sparingly
+		if request_params && json_obj
 
-			unless json_obj.instance_of?(Hash)
-				json_array = JSON::parse(json_obj)			
-			else
+      #unless else is generally considered bad form
+      #Also: Is there ever a Hash passed into this function?
+      if json_obj.instance_of?(Hash)
 				json_array=json_obj
-			end
+      else
+				json_array = JSON::parse(json_obj)			
+      end
 
 			request_params.each do |r|
 				value= json_array[r]	
@@ -24,20 +28,23 @@ module CommonlyUsed
 			end
 		end
 
-	#rescue JSON::ParserError => e
-	#	p e
 	end
 
 	def get_json_from_depth_request(json_obj, depth_request)
-		
-		unless json_obj.nil? || depth_request.nil?
+    
+    #unless is generally used sparingly
+		if json_obj && depth_request
 			json_obj=JSON::parse(json_obj)
 
 			depth_request.each do |item|
 				if json_obj.instance_of?(Hash)
 					json_obj = json_obj[item] if json_obj[item]
 				elsif json_obj.instance_of?(Array)
-					json_obj.each do |hashitem|
+          #modification of an array while iterating over it 
+          #may lead to surprising results
+          #in this case a recursive function call might be a better
+          #alternative. Quickfix: dup 
+          json_obj.dup.each do |hashitem|
 						json_obj=hashitem[item] if hashitem[item]
 					end
 				end
@@ -58,19 +65,29 @@ module CommonlyUsed
 	end
 
 	def each_attribute_from_child_node_XML(xmlitem, xPatharray, attr_name)
+    #In ruby these kind of protective barriers are in general
+    #not done:
+    #We have duck typing - this means that we could construct
+    #an object that is NOT a String but could still be used by Nokogiri
+    #(if Nokogiri itself does not check it that way). You can use
+    #respond_to? if you want to check whether an object is "fit" and
+    #supports the correct methods. 
 		if xmlitem.instance_of?(String)
 		 	doc = Nokogiri::XML(xmlitem)
 		 else
 			doc =xmlitem
 		end
 
-		result= Array.new
+    #use literals if possible
+		result= []
 
-		unless xPatharray.nil?
+		if xPatharray
 			xPatharray.each do |item|
 				doc.xpath(item+"[@#{attr_name}]").each do |attrElement|
-					#binding.pry
-					result.push(attrElement[attr_name])
+
+          #in general, push is not used if the << operator can be used.
+          #It's more "visual".
+					result << attrElement[attr_name]
 				end
 			end
 		end
@@ -79,13 +96,15 @@ module CommonlyUsed
 	end
 
 	def each_attribute_from_node_XML(xmlitem, attr_names)
+    #same note about checking classes applies here.
 		if xmlitem.instance_of?(String)
 		 	doc = Nokogiri::XML(xmlitem)
 		 else
 			doc =xmlitem
 		end
 
-		result= Hash.new
+    #use literals if possible
+		result= {}
 
 		unless doc.nil?
 			attr_names.each do |item|
@@ -94,10 +113,6 @@ module CommonlyUsed
 		end
 		result
 	end
-
-	# def set_value_via_reflection(obj, prop, value)
-	# 	obj.send(prop+"=", value)
-	# end
 
 	def each_attribute_from_xpath(xmlString, element_name, attr_names)
 		get_elements_from_XML(xmlString, element_name) do |item|
@@ -108,38 +123,45 @@ module CommonlyUsed
 	def each_attribute_from_subsections(xmlString, subsection_xpath, xpathattrelements, attr_name) 
 
 		get_elements_from_XML(xmlString, subsection_xpath) do |subsection|
-			#binding.pry
 			yield each_attribute_from_child_node_XML(subsection, xpathattrelements, attr_name)
 		end
 	end
 
-	def get_text_from_node(node)
-		return node.text
+	def encodeString(str, encoding="ISO-8859-1")
+		 #str.encode("utf-8", str.encoding)
+     str.force_encoding(encoding).encode("UTF-8")
+     #str.force_encoding(encoding).encode("UTF-8")
 	end
 
-	def encodeString(str)
-		str.force_encoding("ISO-8859-1").encode("UTF-8")
-	end
-
+  #although you use an underscore here, the W needs to be a small one
+  #('w')
 	def request_Webservice(requestString)
+    #unless is useful here since "" is not falsy.
 		unless requestString.empty? 
-			begin
+			
 				url = URI.escape(requestString)
-				resp = Net::HTTP.get_response(URI.parse(url))
-			rescue Exception
-				puts Exception
-				nil
-			end
-		end 
+        # encoded = URI.encode(url)
+        # doc = open(encoded){ |f| f.read }
+        # doc = doc.encode("utf-8", doc.encoding)
+
+        # encodeString(doc)
+
+
+        resp = Net::HTTP.get_response(URI.parse(url))
+        if resp.code == "200"   
+          encodeString(resp.body)
+        else
+            raise "Webservice Request unsuccesfully: " + webserviceResponse.body 
+        end
+      end
 	end
 
 	def make_Uri_String_from_Hash(hash)
 		first =true
-		#outputString=String.new
 		outputString=""
 
-		unless hash.nil?
-			hash.each do |key,value|
+    if hash
+		  	hash.each do |key,value|
 				outputString +="&" unless first 
 				outputString +="?" if first
 				outputString +=key.to_s
@@ -151,24 +173,14 @@ module CommonlyUsed
 				first=false if first
 			end	
 	 	end
-	 	#binding.pry
 		outputString
 	end
-
 
 	def request_stub(const, paramsHash)
 			result=nil
 			requestURL = const + make_Uri_String_from_Hash(paramsHash)
 			webserviceResponse=request_Webservice(requestURL)
-			
-			if webserviceResponse.code == "200"				
-				encoded_result=encodeString(webserviceResponse.body)
-				result = encoded_result
-				result= yield encoded_result if block_given?
-			else
-				raise "Webservice Request unsuccesfully: " + webserviceResponse.body 
-			end
-			
+			result= yield webserviceResponse if block_given?
 			result
 	end
 	

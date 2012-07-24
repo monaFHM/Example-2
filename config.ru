@@ -1,7 +1,7 @@
 require 'rack'
 require 'pry'
-require 'cgi'
 require 'haml'
+require 'tilt' 
 load 'lib/BuzzwordSearchApp.rb'
 #Start me with rackup config.ru
 #config.ru
@@ -22,17 +22,13 @@ class HelloWorld
 
     getparam = get_query(env)
           
-    if getparam == String.new
-      lines=get_html_base(0,0,[],[],[],[])
+    if getparam.nil? ||getparam == String.new
+      lines=get_html_base(nil,"")
     	[200,{'Content-Type' => 'text/html'}, lines]	
     else
-      #binding.pry
-      if !getparam.nil? || !getparam == String.new
-        @appClass.query(encode_utf8(getparam))
-        lines=get_html_base(@appClass.get_lat, @appClass.get_lng, @appClass.get_current_conditions, @appClass.get_forecast_conditions, @appClass.get_img_tags, @appClass.get_yahoo_questions)
-      end
-
-    	[200,{'Content-Type' => 'text/html'}, lines]
+        @appClass.query(getparam)    
+        lines=get_html_base(@appClass, getparam)
+      	[200,{'Content-Type' => 'text/html'}, lines]
     end
     
   end
@@ -42,9 +38,10 @@ class HelloWorld
 
   	result =""
   	if (env["QUERY_STRING"])
-  		getParams= CGI::parse(env["QUERY_STRING"])
-
-  		result = getParams["query"].join
+  		paramstr= env["QUERY_STRING"]
+      unescaped=Rack::Utils.unescape(paramstr)
+      getParams=Rack::Utils.parse_query(unescaped)
+  		result = getParams["query"]
   	end
 
   	result 
@@ -53,14 +50,45 @@ class HelloWorld
 
 
 
-  def get_html_base(lat, lng, curr_c, fore_c, img_tags, yahoo_answers)
+  def get_html_base(appClass, getparam)
 
-    template = File.read('test.haml')
-    haml_engine = Haml::Engine.new(template)
-    output = haml_engine.render(:locals => {:lat => lat, :lng => lng, :current_conditions => curr_c, :forecast_conditions => fore_c, :flickr_tags => img_tags, :yahoo_items => yahoo_answers}
-)
+#     template = File.read('test.haml')
+#     haml_engine = Haml::Engine.new(template)
+#     output = haml_engine.render(:locals => {:lat => lat, :lng => lng, :current_conditions => curr_c, :forecast_conditions => fore_c, :flickr_tags => img_tags, :yahoo_items => yahoo_answers}
+# )
+    if !appClass || appClass.error
+      lat = 0
+      lng = 0
+      curr_c=[]
+      fore_c=[]
+      img_tags=[]
+      yahoo_answers=[]
+      query=""
+      if !appClass
+        error=false
+      else
+        error=true
+      end
+    else
+      lat = appClass.get_lat
+      lng = appClass.get_lng
+      curr_c=appClass.get_current_conditions
+      fore_c=appClass.get_forecast_conditions
+      img_tags=appClass.get_img_tags
+      yahoo_answers=appClass.get_yahoo_questions
+      query=getparam
+      error=appClass.error
+   end
+
+    context = Object.new  
+    def context.title  
+        "Buzzword Search App"  
+    end  
+      
+    template = Tilt::HamlTemplate.new("test.haml")  
+    output=template.render(context, :locals => {:lat => lat, :lng => lng, :current_conditions => curr_c, :forecast_conditions => fore_c, :flickr_tags => img_tags, :yahoo_items => yahoo_answers, :query => query, :error=> error})  
+
     lines =  output.split(/\n/)
-    lines
   end
 
   def encode_utf8(str)

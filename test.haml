@@ -2,36 +2,63 @@
 %html
   %head
     %title= "Buzzword Search App"
+    %meta{:"http-equiv" => "Content-Type", :content => "text/html;charset=utf-8" } 
     %meta{:content => "", :name => "description" }
     %meta{:content => "Ramona", :name => "author" }
-    %meta{:content => "3 days", :name => "revisit-after" }
-    %link{:href => "/css/screen.css", :media => "screen", :rel => "stylesheet" }
+    %meta{:content => "3 days", :name => "revisit-after" }    
+    %script{:type=>"text/javascript", :src=>"https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"}
+    %script{:type=>"text/javascript", :src=>"http://johannburkard.de/resources/Johann/jquery.highlight-3.js"}
+
+    :css
+      .highlight{
+        background-color:yellow;
+      }
+
   %body
     %header
       %h1= "Buzzword Search App"
       %form{:method => "get"}
-        %input{:type=>"text", :name=>"query", :placeholder => "Ihre Suchangabe", :required => 'true'}
+        %input{:type=>"text", :name=>"query", :placeholder => "#{locals[:query]}", :required => 'true'}
         %input{:type=>"submit", :value=>"Suchen"}
-    #content-wrap
-      %aside#left
-        %h2="Google Geo Information"
-        #googlegeo
-          %iframe{:width=>"300", :height=>"200", :frameborder=>"0", :scrolling => "no", :marginheight => "0", :marginwidth => "0", :src=>"http://maps.google.com/maps?q=#{:lat},#{:lng}&ll=#{:lat},#{:lng}&z=17&output=embed"} 
-        %h2="Google Weather"
-        #googleweather
-          %h2="Aktuelles Wetter"
-          #curr_cond
-            =:current_conditions.each {|c| "<p>"+c.join(" ")+"</p>"} 
-          %h2="Wettervorhersage"
-          #fore_cond=:forecast_conditions.each {|c| "<p>"+c.join(" ")+"</p>"} 
-      #content
-        %h2="Flickr Photos"
-        #flickr_photos
-          %p
-            FLICKR
-        %h2="Yahoo Answer Service"
-        #yahoo_answer
-          %p
-            YAHOO
+      -if locals[:error] 
+        %h2{:style=>"color:red"}= "Die Abfrage der APIs konnte nicht erfolgreich beendet werden"
+    -if !locals[:error]
+      #content-wrap
+        %aside#left
+          %h2="Google Geo Information"
+          #googlegeo
+            %iframe{:width=>"300", :height=>"200", :frameborder=>"0", :scrolling => "no", :marginheight => "0", :marginwidth => "0", :src=>"http://maps.google.com/maps?q=#{locals[:lat]},#{locals[:lng]}&ll=#{:lat},#{:lng}&z=17&output=embed"} 
+          %h2="Google Weather"
+          #googleweather
+            %h4="Aktuelles Wetter"
+            #curr_cond
+            -locals[:current_conditions].each do |item|
+              %p
+                -item.each do |el|
+                  = el#.force_encoding("ISO-8859-1").encode("UTF-8")
+
+            %h4="Wettervorhersage"
+            #fore_cond
+            -locals[:forecast_conditions].each do |item|
+              %p
+                -item.each do |el|
+                  = el=el.encode("utf-8", el.encoding)
+        #content
+          %h2="Flickr Photos"
+          #flickr_photos
+          -locals[:flickr_tags].each do|img_tag|
+            = img_tag
+          %h2="Yahoo Answer Service"
+          #yahoo_answer
+            -locals[:yahoo_items].each do |item|
+              %p= "#{item["Date"]}    #{item["Category"]}"
+              %p= "#{item["UserNick"]}: &quot;#{item["Subject"]}&quot;" 
+              %blockquote= "#{item["Content"]}"
+              %p= "#{item["ChosenAnswererNick"]}"
+              %blockquote= "#{item["ChosenAnswer"]}"
+              %hr
+          -if locals[:query]!=String.new
+            %script{:type=>"text/javascript"}
+              $('#yahoo_answer').highlight('#{locals[:query]}', 'highlight')
     %footer
       %p
